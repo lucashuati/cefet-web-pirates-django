@@ -51,3 +51,10 @@ class SalvarTesouroView(View):
                 form=form
             )
         )
+
+
+class DeletarTesouroView(View):
+    def get(self, request, pk=None):
+        models.Tesouro.objects.get(pk=pk).delete()
+        messages.add_message(request, messages.SUCCESS, 'Tesouro removido com sucesso!')
+        return redirect('list')
