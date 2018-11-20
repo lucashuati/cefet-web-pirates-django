@@ -28,27 +28,46 @@ class ListaTesourosView(View):
 
 
 class SalvarTesouroView(View):
-    def get(self, request):
+    def get(self, request, pk=None):
+        form = forms.TesouroForm()
+        if pk:
+            form = forms.TesouroForm(
+                instance=models.Tesouro.objects.get(pk=pk)
+            )
         return render(
             request,
             template_name='salvar_tesouro.html',
             context=dict(
-                form=forms.TesouroForm
+                form=form,
+                action=f'/edit/{pk}' if pk else 'new'
             )
         )
 
-    def post(self, request):
-        form = forms.TesouroForm(request.POST, request.FILES)
+    def post(self, request, pk=None):
+        form = forms.TesouroForm(
+            request.POST,
+            request.FILES,
+            instance=models.Tesouro.objects.get(pk=pk) if pk else None
+        )
         if form.is_valid():
-            messages.add_message(request, messages.SUCCESS, 'Tesouro criado com sucesso!')
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Tesouro atualizado com sucesso!' if pk else 'Tesouro criado com sucesso!'
+            )
             form.save()
             return redirect('list')
-        messages.add_message(request, messages.ERROR, 'Ocorreu um erro ao criar o tesouro!')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Ocorreu um erro ao criar o tesouro!' if pk else 'Ocorreu um erro ao editar o tesouro!'
+        )
         return render(
             request,
             template_name='salvar_tesouro.html',
             context=dict(
-                form=form
+                form=form,
+                action=f'/edit/{pk}' if pk else 'new'
             )
         )
 
